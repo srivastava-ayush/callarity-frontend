@@ -123,8 +123,11 @@ async function say(text: string, after?: () => void) {
          modelId: "eleven_multilingual_v2",
       });
 
-      for await (const chunk of stream) {
-        const buffer = new Uint8Array(chunk);
+      const reader = stream.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const buffer = new Uint8Array(value);
         await new Promise((resolve) => {
           const onUpdate = () => {
             sourceBuffer.removeEventListener("updateend", onUpdate);
